@@ -516,23 +516,59 @@ function Counter() {
 
 ##### Effect cleanup
 
-- Một số side effect cần phải được dọn dẹp trước khi component bị xóa khỏi DOM. Ví dụ: trong callback effect bạn có thực hiện thao tác đăng ký sự kiện, bạn cần phải hủy đăng ký sự kiện đó trước khi component bị xóa khỏi DOM. Để làm điều này, bạn cần sử dụng effect cleanup.
-- Nếu hàm callback của `useEffect(callback, deps)` return về một hàm, thì nó được coi là effect cleanup.
-
-```jsx
-useEffect(() => {
-  // Your effect
-
-  return () => {
-    // Cleanup
-  };
-}, []);
-```
+- Một số side effect cần phải được dọn dẹp trước khi component bị xóa khỏi DOM, để tránh bị memory leak. Ví dụ: trong callback effect bạn có thực hiện thao tác đăng ký sự kiện, bạn cần phải hủy đăng ký sự kiện đó trước khi component bị xóa khỏi DOM. Để làm điều này, bạn cần sử dụng effect cleanup. Nếu hàm callback của `useEffect(callback, deps)` return về một hàm, thì nó được coi là effect cleanup.
 
 - Effect cleanup hoạt động như sau:
   - Sau khi render lần đầu, useEffect() gọi hàm callback và return về hàm cleanup.
   - Trong các lần render tiếp theo, nếu mảng phụ thuộc bị thay đổi, trước khi gọi lại hàm callback thì useEffect sẽ gọi hàm cleanup đã được hàm callback return về ở lần thực thi trước đó. Mục đích của hàm cleanup này là để giải phóng các tài nguyên được sử dụng trong hàm callback của useEffect trước đó.
   - Cuối cùng, trước khi component bị huỷ bỏ, useEffect gọi hàm cleanup của lần thực thi cuối cùng.
+
+```jsx
+useEffect(() => {
+  // Các trường hợp cần thực hiện effect cleanup để tránh memory leak như event listeners, timers, subscriptions, websockets,...
+
+  const handleMouseMove = (event) => {
+    console.log(event.clientX, event.clientY);
+  };
+  document.addEventListener("mousemove", handleMouseMove);
+
+  const timer = setInterval(() => {
+    console.log("Hello");
+  }, 1000);
+
+  return () => {
+    document.removeEventListener("mousemove", handleMouseMove);
+
+    clearInterval(timer);
+  };
+}, []);
+```
+
+- Xử lý race condition khi gọi API. Ví dụ trường hợp khi người dùng chuyển trang một cách nhanh chóng, mỗi lần giá trị thay đổi sẽ gọi API để lấy dữ liệu mới. Tuy nhiên, do việc gọi API là một tác vụ bất đồng bộ, nên có thể xảy ra trường hợp API request sau cùng trả về trước request trước đó, dẫn đến việc hiển thị dữ liệu không chính xác. Ta cần phải hủy bỏ request cũ khi có request mới được gọi bằng cách sử dụng effect cleanup.
+
+```jsx
+const [posts, setPosts] = useState([]);
+const [page, setPage] = useState(1);
+
+useEffect(() => {
+  const controller = new AbortController();
+
+  async function fetchPosts() {
+    const response = await axios.get(`https://example.com/api/posts`, {
+      signal: controller.signal,
+      params: { page, limit: 10 },
+    });
+
+    setPosts(response.data);
+  }
+
+  fetchPosts();
+
+  return () => {
+    controller.abort();
+  };
+}, [page]);
+```
 
 ##### Component lifecycle
 

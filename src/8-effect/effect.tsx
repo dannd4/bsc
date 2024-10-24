@@ -7,6 +7,7 @@ export default function Effect() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedUser, setSelectedUser] = useState("");
 
+  // TH1: Chỉ chạy useEffect callback 1 lần duy nhất sau lần render đầu tiên
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await axios.get<User[]>("https://jsonplaceholder.typicode.com/users");
@@ -16,17 +17,26 @@ export default function Effect() {
     fetchUsers();
   }, []);
 
+  // TH2: Chạy sau lần render đầu tiên, và những lần render sau nếu giá trị selectedUser bị thay đổi
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchPosts = async () => {
       const response = await axios.get<Post[]>("https://jsonplaceholder.typicode.com/posts", {
+        signal: controller.signal,
         params: {
           userId: selectedUser || undefined,
         },
       });
+
       setPosts(response.data);
     };
 
     fetchPosts();
+
+    return () => {
+      controller.abort();
+    };
   }, [selectedUser]);
 
   return (
