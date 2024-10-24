@@ -4,13 +4,14 @@ import RenderList from "./3-render-list/render-list";
 import Events from "./4-events/events";
 import Props from "./5-props/props";
 import State from "./6-state/state";
-import Effect from "./7-effect/effect";
+import Reducer from "./7-reducer/reducer";
+import Effect from "./8-effect/effect";
+import Refs from "./9-refs/refs";
 
 function App() {
   return (
     <>
-      <h1>Hello React!!!</h1>
-      <State />
+      <Refs />
     </>
   );
 }

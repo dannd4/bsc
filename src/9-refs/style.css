@@ -1,0 +1,36 @@
+/* Styles for the toggle button */
+.toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 48px;
+  height: 24px;
+  padding: 4px;
+  background-color: #f44336;
+  /* Default background color (red) */
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  /* Smooth background color transition */
+}
+
+.toggle-circle {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  /* Smooth transform transition */
+}
+
+.toggle-on {
+  background-color: #4CAF50;
+  /* Green background when toggled on */
+}
+
+.move-right {
+  transform: translateX(24px);
+  /* Move the circle to the right */
+}
