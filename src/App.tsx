@@ -7,11 +7,12 @@ import State from "./6-state/state";
 import Reducer from "./7-reducer/reducer";
 import Effect from "./8-effect/effect";
 import Refs from "./9-refs/refs";
+import TodoApp from "./ex-todo-app/todo-app";
 
 function App() {
   return (
     <>
-      <Refs />
+      <TodoApp />
     </>
   );
 }
