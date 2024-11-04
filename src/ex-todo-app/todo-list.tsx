@@ -4,14 +4,15 @@ import { Todo } from "./types";
 interface TodoListProps {
   todos: Todo[];
   onDeleteTodo: (todoId: string) => void
+  onUpdateStatus: (todoId: string) => void
 }
 
-export default function TodoList({ todos, onDeleteTodo }: TodoListProps) {
+export default function TodoList({ todos, onDeleteTodo, onUpdateStatus }: TodoListProps) {
   return (
     <section className="bg-white rounded-md">
       <div className="max-h-[600px] overflow-y-auto">
         {todos.map((todo) => {
-          return <TodoItem key={todo._id} todo={todo} onDeleteTodo={onDeleteTodo} />;
+          return <TodoItem key={todo._id} todo={todo} onDeleteTodo={onDeleteTodo} onUpdateStatus={onUpdateStatus} />;
         })}
       </div>
 

@@ -5,7 +5,7 @@ interface Item {
   name: string;
 }
 
-const ExpensiveList: React.FC<{ items: Item[] }> = React.memo(({ items }) => {
+const ExpensiveList: React.FC<{ items: Item[], onAddItem: any }> = React.memo(({ items }) => {
   console.log("ExpensiveList rendered");
   return (
     <ul>
@@ -16,7 +16,7 @@ const ExpensiveList: React.FC<{ items: Item[] }> = React.memo(({ items }) => {
   );
 });
 
-const Performance: React.FC = () => {
+const Performance = () => {
   const [count, setCount] = useState(0);
   const [items, setItems] = useState<Item[]>([
     { id: 1, name: "Item 1" },
@@ -62,9 +62,7 @@ const Performance: React.FC = () => {
       <h2>Performance Demo</h2>
 
       <div>
-        <button onClick={() => setCount((c) => c + 1)}>
-          Increment Count: {count}
-        </button>
+        <button onClick={() => setCount((c) => c + 1)}>Increment Count: {count}</button>
       </div>
 
       <div>
@@ -72,7 +70,7 @@ const Performance: React.FC = () => {
         <button onClick={handleAddItem}>Add Item</button>
       </div>
 
-      <ExpensiveList items={items} />
+      <ExpensiveList items={items} onAddItem={handleAddItem} />
     </div>
   );
 };

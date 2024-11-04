@@ -15,7 +15,7 @@ import TodoApp from "./ex-todo-app/todo-app";
 function App() {
   return (
     <>
-      <TodoApp />
+      <Performance />
     </>
   );
 }

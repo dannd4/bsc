@@ -4,7 +4,7 @@ function Controls() {
   const { theme, toggleDarkMode } = useTheme();
 
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div className="mb-4">
       <div>
         <label>
           Dark Mode:

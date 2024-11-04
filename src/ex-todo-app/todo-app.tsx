@@ -1,16 +1,27 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import TodoCreate from "./todo-create";
 import TodoFilter from "./todo-filter";
 import TodoList from "./todo-list";
-import { Todo } from "./types";
+import { Filter, Todo } from "./types";
 
 const http = axios.create({
   baseURL: "https://api.freeapi.app",
+  // baseURL: "https://freeapi-cybersoft.up.railway.app"
 });
 
-const fetchTodos = async () => {
-  const response = await http.get(`/api/v1/todos`);
+const fetchTodos = async (filter: Filter) => {
+  const mapper = {
+    all: undefined,
+    active: false,
+    completed: true,
+  };
+
+  const response = await http.get(`/api/v1/todos`, {
+    params: {
+      complete: mapper[filter],
+    },
+  });
   return response.data.data;
 };
 
@@ -24,17 +35,23 @@ const deleteTodo = async (todoId: string) => {
   return response.data.data;
 };
 
+const updateStatusTodo = async (todoId: string) => {
+  const response = await http.patch(`/api/v1/todos/toggle/status/${todoId}`);
+  return response.data.data;
+};
+
 export default function TodoApp() {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [filter, setFilter] = useState<Filter>("all");
 
-  const getTodos = async () => {
-    const data = await fetchTodos();
+  const getTodos = useCallback(async () => {
+    const data = await fetchTodos(filter);
     setTodos(data);
-  };
+  }, [filter]);
 
   useEffect(() => {
     getTodos();
-  }, []);
+  }, [getTodos]);
 
   const handleCreateTodo = async (todo: string) => {
     const data = await createTodo(todo);
@@ -50,6 +67,15 @@ export default function TodoApp() {
     getTodos();
   };
 
+  const handleUpdateStatus = async (todoId: string) => {
+    await updateStatusTodo(todoId);
+    getTodos();
+  };
+
+  const handleUpdateFilter = (filter: Filter) => {
+    setFilter(filter);
+  };
+
   return (
     <>
       <div className="flex flex-col gap-8 place-self-center min-w-[500px] w-1/3 rounded-xl pt-10">
@@ -59,9 +85,9 @@ export default function TodoApp() {
 
         <TodoCreate onCreateTodo={handleCreateTodo} />
 
-        <TodoList todos={todos} onDeleteTodo={handleDeleteTodo} />
+        <TodoList todos={todos} onDeleteTodo={handleDeleteTodo} onUpdateStatus={handleUpdateStatus} />
 
-        <TodoFilter />
+        <TodoFilter filter={filter} onUpdateFilter={handleUpdateFilter} />
       </div>
     </>
   );

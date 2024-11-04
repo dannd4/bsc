@@ -4,3 +4,5 @@ export interface Todo {
   description?: string;
   isComplete: boolean;
 }
+
+export type Filter = "all" | "active" | "completed";

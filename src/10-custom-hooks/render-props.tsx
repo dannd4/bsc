@@ -40,7 +40,7 @@ class WindowSize extends React.Component<WindowSizeProps, WindowSizeState> {
 //     width: window.innerWidth,
 //     height: window.innerHeight,
 //   });
-//
+
 //   React.useEffect(() => {
 //     const handleResize = () => {
 //       setWindowSize({
@@ -48,11 +48,11 @@ class WindowSize extends React.Component<WindowSizeProps, WindowSizeState> {
 //         height: window.innerHeight,
 //       });
 //     };
-//
+
 //     window.addEventListener("resize", handleResize);
 //     return () => window.removeEventListener("resize", handleResize);
 //   }, []);
-//
+
 //   return children(windowSize);
 // };
 
