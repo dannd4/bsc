@@ -685,7 +685,7 @@ function MyComponent() {
 }
 ```
 
-### Custom Hooks
+#### Custom Hooks
 
 - Custom hooks là những hooks mà bạn tự tạo ra để thực hiện một chức năng riêng biệt. Đây là một kĩ thuật để chia sẻ logic được tạo lại giữa các component. Nó giúp tái sử dụng code và giảm sự lặp lại trong ứng dụng của bạn.
 - Custom hooks thực chất là các hàm bắt đầu bằng từ khóa `use` và có thể gọi đến các hooks khác (Các hooks mặc định của React như useState, useEffect, useRef,... hoặc các custom hooks của bạn). VD: `useCounter`, `useDebounce`, ...
@@ -712,6 +712,148 @@ function Counter() {
   );
 }
 ```
+
+### Performance hooks
+
+React cung cấp một số function và hooks để tối ưu hiệu suất của component.
+
+#### Memo
+
+`memo` là một hàm dùng để tối ưu hóa hiệu suất của các component bằng cách ghi nhớ (memoization) component đó, giúp tránh render lại không cần thiết khi các props của component không thay đổi. Điều này đặc biệt hữu ích trong những ứng dụng lớn, nơi mà việc render lại các component không cần thiết có thể gây ra hiệu suất chậm chạp.
+
+Cú pháp: `const MemoizedComponent = memo(Component, compareFn?)`
+
+- Component: là component mà bạn muốn memo.
+- compareFn: Một hàm chấp nhận hai đối số props trước đó và props mới của component. Nếu hàm này trả về true, component sẽ không được render lại. Thông thường bạn sẽ không cần chỉ định hàm này, React sẽ so sánh từng prop với Object.is.
+
+Ví dụ: skip re-render khi props không thay đổi
+
+```jsx
+const Profile = memo(({ name }) => {
+  return <div>Hello, {name}</div>;
+});
+Profile.displayName = "Profile";
+```
+
+Ví dụ: Chỉ định một hàm so sánh props
+
+```jsx
+const Chart = memo(
+  ({ points }) => {
+    return <div>...</div>;
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.points.length === nextProps.points.length &&
+      prevProps.points.every(
+        (point, index) => point.x === nextProps.points[index].x
+      )
+    );
+  }
+);
+Chart.displayName = "Chart";
+```
+
+#### useCallback
+
+`useCallback` là một hook trong React giúp bạn tối ưu hóa hiệu suất của các component bằng cách ghi nhớ (memoization) các định nghĩa hàm giữa các lần render. Việc này giúp tránh tạo lại một hàm mới trong mỗi lần render, trừ khi các dependencies của hàm đó thay đổi. Điều này đặc biệt hữu ích khi bạn truyền hàm đó làm prop xuống các component con hoặc sử dụng nó trong các hook khác (như useEffect) mà phụ thuộc vào hàm đó.
+
+Cú pháp: `const memoizedCallback = useCallback(fn, dependencies)`
+
+- fn: là hàm mà bạn muốn được ghi nhớ
+- dependencies: tương tự như useEffect, là một mảng chứa các giá trị mà hàm fn phụ thuộc vào. Trong các lần render tiếp theo, nếu các giá trị trong mảng không thay đổi, hàm fn sẽ không được tạo lại.
+
+Nếu bạn truyền một hàm vào một component con, bạn cần sử dụng useCallback để tránh component con render lại mỗi lần render component cha.
+
+```jsx
+function Account({ userId, ...props }) {
+  // Nói cho React ghi nhớ hàm handleSubmit giữa các lần render nếu userId không thay đổi
+  const handleSubmit = useCallback(() => {
+    // Gọi API để lưu thông tin người dùng
+  }, [userId]);
+
+  return (
+    <div>
+      ...
+      <UserForm onSubmit={handleSubmit} />
+    </div>
+  );
+}
+
+// Skip re-render khi props không thay đổi
+const UserForm = memo(({ onSubmit }) => {
+  return <form onSubmit={onSubmit}>...</form>;
+});
+```
+
+Nếu bạn cần cập nhật state dựa vào state trước đó từ một callback đã được ghi nhớ, bạn cần đặt state đó vào mảng phụ thuộc của useCallback. Hoặc bạn có thể loại bỏ state ra khỏi mảng phụ thuộc bằng cách truyền một hàm cập nhật thay khi cập nhật state.
+
+```jsx
+function Cart() {
+  const [items, setItems] = useState([]);
+
+  const addItem = useCallback(
+    (item) => {
+      setItems([...items, item]);
+    },
+    [items]
+  );
+
+  const removeItem = useCallback((item) => {
+    setItems((items) => items.filter((i) => i.id !== item.id));
+  }, []);
+}
+```
+
+Nếu bạn cần gọi một hàm bên trong useEffect, bạn cần đặt hàm đó vào mảng phụ thuộc của useEffect. Tuy nhiên, nó sẽ khiến useEffect gọi lại mỗi lẩn render. Để giải quyết vấn đề này, bạn có thể bọc hàm mà bạn cần gọi từ một Effect vào useCallback:
+
+```jsx
+function Posts({ userId }) {
+  const [posts, setPosts] = useState([]);
+
+  const fetchPosts = useCallback(() => {
+    // Gọi API để lấy dữ liệu
+  }, [userId]);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+}
+```
+
+Nếu bạn đang viết một custom hook, lời khuyên là nên bọc bất kì hàm nào mà nó trả về vào useCallback.
+
+```jsx
+function useToggle(initialValue = false) {
+  const [value, setValue] = useState(initialValue);
+
+  const on = useCallback(() => setValue(true), []);
+  const off = useCallback(() => setValue(false), []);
+  const toggle = useCallback(() => setValue((value) => !value), []);
+
+  return [value, { on, off, toggle }];
+}
+```
+
+#### useMemo
+
+`useMemo` là một Hook trong React cho phép bạn ghi nhớ kết quả của một phép tính giữa các lần render. Điều này giúp tránh tính toán lại giá trị mà không cần thiết giữa các lần render.
+
+Cú pháp: `const memoizedValue = useMemo(calculateValue, dependencies)`
+
+- calculateValue: là hàm tính toán và trả về một giá trị mà bạn muốn ghi nhớ.
+- dependencies: tương tự như useEffect, là một mảng chứa các giá trị được sử dụng trong hàm calculateValue. Nếu các giá trị trong mảng không thay đổi, kết quả của hàm calculateValue sẽ không được tính lại.
+
+```jsx
+function ExpensiveComponent({ chartData }) {
+  const [count, setCount] = useState(0);
+
+  const expensiveCalculation = useMemo(() => {
+    // Tính toán giá trị tốn kém
+  }, [chartData]);
+}
+```
+
 
 ### Context
 
