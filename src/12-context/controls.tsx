@@ -8,11 +8,7 @@ function Controls() {
       <div>
         <label>
           Dark Mode:
-          <input
-            type="checkbox"
-            checked={theme.isDarkMode}
-            onChange={toggleDarkMode}
-          />
+          <input type="checkbox" checked={theme.isDarkMode} onChange={toggleDarkMode} />
         </label>
       </div>
     </div>
