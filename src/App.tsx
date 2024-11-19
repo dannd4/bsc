@@ -12,10 +12,11 @@ import Reducer from "./7-reducer/reducer";
 import Effect from "./8-effect/effect";
 import Refs from "./9-refs/refs";
 import ShoppingCart from "./ex-shopping-cart/shopping-cart";
+import TodoAppRedux from "./ex-todo-app-redux/todo-app";
 import TodoApp from "./ex-todo-app/todo-app";
 
 function App() {
-  return <Redux />;
+  return <TodoAppRedux />;
 }
 
 export default App;

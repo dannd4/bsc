@@ -854,7 +854,6 @@ function ExpensiveComponent({ chartData }) {
 }
 ```
 
-
 ### Context
 
 - Thông thường, ta sẽ dùng `props` để truyền dữ liệu từ component cha sang component con. Tuy nhiên, việc truyền props có thể trở nên dài dòng và bất tiện nếu bạn phải truyền chúng thông qua nhiều lớp component ở giữa hoặc nếu nhiều component trong ứng dụng của bạn cần sử dụng một giá trị prop giống nhau.
@@ -949,3 +948,338 @@ function ExpensiveComponent({ chartData }) {
     );
   }
   ```
+
+### Redux
+
+Redux là một thư viện giúp quản lý global state cho các ứng dụng javascript, đặc biệt được biết đến khi kết hợp với React. Nó giúp bạn quản lý state của ứng dụng một cách dễ dàng và hiệu quả hơn.
+Tương tự như context, Redux cũng giúp bạn truyền dữ liệu giữa các component mà không cần thông qua các lớp component ở giữa. Tuy nhiên, Redux cung cấp một cơ chế để quản lý state của toàn bộ ứng dụng, giúp bạn dễ dàng theo dõi và cập nhật state.
+Redux gồm 3 thành phần chính:
+
+- Store: Là nơi lưu trữ state của toàn bộ ứng dụng. Store trong Redux là một object chứa toàn bộ state tree của ứng dụng. Chỉ có duy nhất một store trong một ứng dụng Redux. Store cung cấp các phương thức để:
+  - Truy cập state thông qua getState()
+  - Cập nhật state thông qua dispatch(action)
+  - Đăng ký listener thông qua subscribe(listener)
+  - Hủy đăng ký listener được trả về bởi subscribe(listener)
+- Action: Là một plain object có thuộc tính type để mô tả những gì đã xảy ra trong ứng dụng.
+- Reducer: Là các hàm thực thi các thay đổi state (trong store) dựa theo các thông tin trong action. Reducer nhận hai tham số là state hiện tại và action, và trả về một state mới.
+
+![Redux](https://redux.js.org/assets/images/ReduxDataFlowDiagram-49fa8c3968371d9ef6f2a1486bd40a26.gif)
+
+Để sử dụng Redux trong React, ta cần cài đặt các thư viện sau:
+
+- `@reduxjs/toolkit` thư viện chính để làm việc với redux.
+- `react-redux` thư viện giúp kết nối react với redux.
+
+Các bước để sử dụng Redux trong React:
+
+- Cấu hình redux store:
+
+```jsx
+// store.js
+import { configureStore } from "@reduxjs/toolkit";
+
+const store = configureStore({ reducer });
+
+function reducer(state = { count: 0 }, action) {
+  switch (action.type) {
+    case "INCREMENT":
+      return { count: state.count + 1 };
+    case "DECREMENT":
+      return { count: state.count - 1 };
+    default:
+      return state;
+  }
+}
+
+export default store;
+```
+
+- Kết nối redux store với react component:
+
+```jsx
+// index.js
+import { Provider } from "react-redux";
+import store from "./store";
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById("root")
+);
+```
+
+- Sử dụng các hooks useSelector và useDispatch trong component để lấy state và dispatch action:
+
+```jsx
+// Counter.jsx
+import { useSelector, useDispatch } from "react-redux";
+
+function Counter() {
+  const count = useSelector((state) => state.count);
+  const dispatch = useDispatch();
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => dispatch({ type: "DECREMENT" })}>-</button>
+      <button onClick={() => dispatch({ type: "INCREMENT" })}>+</button>
+    </div>
+  );
+}
+```
+
+### Cách tổ chức code trong Redux
+
+- Trong Redux, chia file là một phần quan trọng trong việc tổ chức code. Bạn có thể chia các thành phần của Redux thành các file riêng biệt để giữ cho code dễ đọc và dễ bảo trì hơn. Dưới đây là một số cách chia file trong Redux:
+
+  - Reducers: Mỗi reducer quản lý một phần của state và cập nhật nó dựa trên loại action và thông tin được đưa ra. Để giữ cho code được tổ chức tốt, bạn có thể chia các reducers thành các file riêng biệt, mỗi file quản lý một phần của state. Ví dụ: nếu bạn có một ứng dụng quản lý các task, bạn có thể chia reducers thành file taskReducer.js để quản lý trạng thái của các task, file userReducer.js để quản lý trạng thái của người dùng.
+  - Action Creators: Một quy ước phổ biến khác là thay vì tạo các object ở những nơi bạn dispatch các actions, bạn nên viết các hàm tạo ra các action đó. Mỗi hàm này được gọi là action creator. Ví dụ: nếu bạn có một ứng dụng quản lý các task, bạn có thể chia các action creator thành file taskActions.js để quản lý các action liên quan đến task, và file userActions.js để quản lý các action liên quan đến người dùng.
+
+  ```jsx
+  // taskActions.js
+  export function addTodo(text) {
+    return {
+      type: "ADD_TODO",
+      payload: text,
+    };
+  }
+
+  // AddTodo.jsx
+  import { addTodo } from "./taskActions";
+  dispatch(addTodo("Use Redux"));
+  ```
+
+  - Action types: Một quy ước khác là đặt tên cho các action types. Điều này giúp bạn tránh các lỗi khi gõ tên action type. Ví dụ: nếu bạn có một ứng dụng quản lý các task, bạn có thể chia các action types thành file taskContants.js để quản lý các action types liên quan đến task, và file userContants.js để quản lý các action types liên quan đến người dùng.
+
+  ```jsx
+  // taskContants.js
+  export const ADD_TODO = "ADD_TODO";
+  export const REMOVE_TODO = "REMOVE_TODO";
+
+  // taskActions.js
+  import { ADD_TODO, REMOVE_TODO } from "./taskContants";
+
+  export function addTodo(text) {
+    return {
+      type: ADD_TODO,
+      payload: text,
+    };
+  }
+  ```
+
+## 18. Redux middleware
+
+- Redux middleware là một lớp trung gian giữa việc dispatch một action và khi action đó được xử lý bởi reducer trong Redux. Middleware cho phép bạn mở rộng hoặc thay đổi hành vi của Redux trong quá trình xử lý action. Mỗi middleware được thiết kế để chỉnh sửa hoặc trung gian giữa các action đi qua nó, như vậy, middleware cho phép bạn thực hiện các chức năng bổ sung, chẳng hạn như ghi log hoặc thực hiện các xử lý bất đồng bộ, mà không làm thay đổi trực tiếp hành vi của Redux.
+
+- Tự tạo một middleware:
+
+```jsx
+const loggerMiddleware = (store) => (next) => (action) => {
+  console.log("Action: ", action);
+  console.log("Previous state: ", store.getState());
+  next(action);
+  console.log("Next state: ", store.getState());
+};
+
+// store.js
+import { configureStore } from "@reduxjs/toolkit";
+import loggerMiddleware from "./middleware/loggerMiddleware";
+import rootReducer from "./reducers";
+
+const store = configureStore({
+  reducer: rootReducer,
+  // Mặc định Redux Toolkit sẽ thêm một số middleware vào store, để thêm middleware vào store, ta sử dụng cú pháp sau:
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(loggerMiddleware),
+});
+
+export default store;
+```
+
+- Trường hợp phổ biến nhất để sử dụng middleware là khi bạn muốn thực hiện các xử lý bất đồng bộ. Để thực hiện điều này, bạn có thể sử dụng một trong những thư viện middleware sau: `redux-thunk`, `redux-saga`, `redux-observable`.
+
+  - `redux-thunk`: Cho phép dispatch một function thay vì một object. Function này sẽ nhận vào hai tham số là dispatch và getState.
+
+  ```jsx
+  // userActions.js
+  // Thay vì return về một object, ta return về một function, function này nhận vào hai tham số là dispatch và getState
+  // Ta có thể thực hiện các xử lý bất đồng bộ trong function này, sau đó dispatch một action bình thường để cập nhật state
+  export const getUser = () => (dispatch, getState) => {
+    try {
+      dispatch({ type: "GET_USER_PENDING" });
+      const response = await axios.get("https://jsonplaceholder.typicode.com/users");
+      dispatch({ type: "GET_USER_FULLFILED", payload: response.data });
+    } catch (error) {
+      dispatch({ type: "GET_USER_REJECTED", payload: error });
+    }
+  };
+
+  // userReducer.js
+  const initialState = {
+    loading: false,
+    data: null,
+    error: null,
+  };
+
+  const userReducer = (state = initialState, action) => {
+    switch (action.type) {
+      case "GET_USER_PENDING":
+        return {
+          ...state,
+          loading: true,
+        };
+      case "GET_USER_FULLFILED":
+        return {
+          ...state,
+          loading: false,
+          data: action.payload,
+        };
+      case "GET_USER_REJECTED":
+        return {
+          ...state,
+          loading: false,
+          error: action.payload,
+        };
+      default:
+        return state;
+    }
+  };
+
+  // User.jsx
+  import { getUser } from "./action";
+
+  function User() {
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user);
+
+    useEffect(() => {
+      dispatch(getUser());
+    }, []);
+
+    return (
+      <div>
+        {user.loading && <p>Loading...</p>}
+        {user.error && <p>{user.error}</p>}
+        {user.data && <p>{user.name}</p>}
+      </div>
+    );
+  }
+  ```
+
+## 19. Redux toolkit
+
+- Redux Toolkit là một thư viện cung cấp các công cụ và tiện ích hỗ trợ việc sử dụng Redux một cách hiệu quả. Redux Toolkit được thiết kế để giảm thiểu độ phức tạp và lặp lại trong việc viết Redux, nó bao gồm các hàm mà bạn có thể sử dụng để tạo các action, reducer, middleware, store, và các hàm khác mà bạn có thể sử dụng để tối ưu hóa việc viết mã của bạn.
+
+- Tạo store khi chưa sử dụng Redux toolkit:
+
+```jsx
+// store.js
+import { createStore, applyMiddleware, combineReducers } from "redux";
+import thunk from "redux-thunk";
+import userReducer from "./reducers/userReducer";
+import taskReducer from "./reducers/taskReducer";
+
+const rootReducer = combineReducers({
+  user: userReducer,
+  task: taskReducer,
+});
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+const store = createStore(
+  rootReducer,
+  composeEnhancers(applyMiddleware(thunk))
+);
+```
+
+- Tạo store khi đã sử dụng Redux toolkit:
+
+```jsx
+// store.js
+import { configureStore } from "@reduxjs/toolkit";
+import userReducer from "./reducers/userReducer";
+import taskReducer from "./reducers/taskReducer";
+
+// Mặc định redux hỗ trợ sẵn redux-devtools, redux-thunk nên không cần setup gì thêm.
+const store = configureStore({
+  reducer: {
+    user: userReducer,
+    task: taskReducer,
+  },
+});
+```
+
+- Hàm createSlice: là một hàm để tạo reducers và actions một cách đơn giản và hiệu quả.
+
+```jsx
+// userSlice.js
+import { createSlice } from "@reduxjs/toolkit";
+
+// Khi sử dụng createSlice, bạn chỉ cần truyền vào một object bao gồm các thuộc tính:
+// - name: tên của reducer
+// - initialState: các giá trị khởi tạo ban đầu
+// - reducers: các hàm reducers để xử lý các action tương ứng. createSlice sẽ tự động sinh ra các actions tương ứng và các reducers cho từng action đó.
+const countSlice = createSlice({
+  name: "count",
+  initialState: 0,
+  reducers: {
+    increment: (state) => state + 1,
+    decrement: (state) => state - 1,
+  },
+});
+
+export const { increment, decrement } = countSlice.actions;
+
+export default countSlice.reducer;
+```
+
+- Hàm createAsyncThunk: là một hàm để tạo ra các action bất đồng bộ một cách đơn giản và hiệu quả.
+
+```jsx
+// userSlice.js
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
+// Khi sử dụng createAsyncThunk, bạn cần truyền vào 2 tham số:
+// - name: tên của action
+// - payloadCreator: hàm để thực hiện các xử lý bất đồng bộ
+
+// Khi sử dụng createAsyncThunk, nó sẽ tự động sinh ra 3 action tương ứng:
+// - pending: action này sẽ được dispatch khi hàm payloadCreator được gọi
+// - fulfilled: action này sẽ được dispatch khi hàm payloadCreator được thực thi thành công và return về một giá trị
+// - rejected: action này sẽ được dispatch khi hàm payloadCreator được thực thi thất bại và throw ra một lỗi
+export const getUser = createAsyncThunk("user/getUser", async () => {
+  try {
+    const response = await axios.get(
+      "https://jsonplaceholder.typicode.com/users"
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+});
+
+// Để sử dụng các action được sinh ra bởi createAsyncThunk, ta chỉ cần truyền vào thuộc tính extraReducers của createSlice
+// Trong thuộc tính extraReducers, ta sẽ truyền vào một object builder, trong đó ta sẽ sử dụng các hàm addCase để xử lý các action được sinh ra bởi createAsyncThunk
+const userSlice = createSlice({
+  name: "user",
+  initialState: {
+    loading: false,
+    data: null,
+    error: null,
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(getUser.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(getUser.fulfilled, (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    });
+    builder.addCase(getUser.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    });
+  },
+```

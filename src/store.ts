@@ -11,11 +11,20 @@ import { todoReducer } from "./slices/todo";
 //   next(action);
 // };
 
+// const thunkMiddleware = (store) => (next) => (action) => {
+//   if(typeof action === function) {
+//     action(store.dispatch, store.getState)
+//   }
+
+//   next(action)
+// };
+
 const store = configureStore({
   reducer: {
     counter: counterReducer,
     todo: todoReducer,
   },
+
   // middleware: (getDefaultMiddleware) => new Tuple(loggerMiddleware).concat(getDefaultMiddleware({
   //   thunk: false
   // }))
@@ -24,6 +33,7 @@ const store = configureStore({
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
+// Trong ứng dụng thực tế sẽ khai báo ở 1 file riêng. Eg: hooks/useReactRedux
 export const useDispatch = useAppDispatch.withTypes<typeof store.dispatch>();
 export const useSelector = useAppSelector.withTypes<RootState>();
 

@@ -8,6 +8,7 @@ const counterSlice = createSlice({
   reducers: {
     increase: (state) => {
       // Được tích hợp sẵn immer nên có thể thay đổi state như mutate
+      // return {...state, count: state.count + 1}
       state.count = state.count + 1;
     },
     decrease: (state) => {

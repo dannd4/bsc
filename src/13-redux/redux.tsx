@@ -1,11 +1,11 @@
 import { useSelector, useDispatch } from "../store";
 import { increaseBy, increase } from "../slices/counter";
 import { useEffect } from "react";
-import { getTodos, todoSelector } from "../slices/todo";
+import { getTodos } from "../slices/todo";
 
 export default function Redux() {
   const count = useSelector((state) => state.counter.count);
-  const { todos, loading, error } = useSelector(todoSelector);
+  const { todos, loading, error } = useSelector((state) => state.todo);
   const dispatch = useDispatch();
 
   const handleIncrease = () => {
