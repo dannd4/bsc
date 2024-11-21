@@ -1283,3 +1283,346 @@ const userSlice = createSlice({
     });
   },
 ```
+
+## React Query
+
+Tanstack Query (React Query) là một thư viện được thiết kế để xử lý việc lấy, lưu trữ, đồng bộ hóa và cập nhật trạng thái máy chủ trong các ứng dụng web của bạn trở nên dễ dàng. Đây là một công cụ phổ biến trong các ứng dụng React vì giúp tối ưu hóa trải nghiệm người dùng, giảm tải việc quản lý dữ liệu, và loại bỏ nhiều boilerplate code.
+
+Các tính năng nổi bật:
+
+1. Caching:
+
+- Tự động cache dữ liệu API để giảm số lượng yêu cầu (request).
+- Dữ liệu được cache có thể được cấu hình để tự động hết hạn sau một khoảng thời gian.
+
+2. Quản lý trạng thái dữ liệu bất đồng bộ:
+
+- Dễ dàng xử lý các trạng thái như loading, error, và success mà không cần viết nhiều code thủ công.
+
+3. Refetching linh hoạt:
+
+- Hỗ trợ tự động làm mới (refetch) dữ liệu khi người dùng tương tác hoặc khi dữ liệu cũ.
+
+4. Hỗ trợ stale-while-revalidate:
+
+- Cung cấp dữ liệu cũ trong khi đang tải lại dữ liệu mới (giảm thời gian chờ của người dùng).
+
+5. Background fetching:
+
+- Dữ liệu được làm mới ở nền khi ứng dụng vẫn hoạt động.
+
+6. Pagination và Infinite Query:
+
+- Hỗ trợ phân trang và tải vô hạn với API trực quan.
+
+7. Devtools mạnh mẽ:
+
+- Cung cấp công cụ trực quan để theo dõi cache, trạng thái query, và debugging.
+
+8. Tích hợp dễ dàng với các framework khác:
+
+- Hoạt động tốt với các thư viện như Redux, Zustand, hoặc bất kỳ state management nào.
+
+### Client state vs Server state
+
+| Client State                              | Server State                                               |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| Đồng bộ và có thể truy cập ngay lập tức   | Bất đồng bộ và cần thời gian để truy xuất                  |
+| Dữ liệu được lưu trữ cục bộ               | Dữ liệu được lưu trữ từ xa trên máy chủ                    |
+| Ứng dụng có toàn quyền kiểm soát          | Không có quyền kiểm soát trực tiếp, chỉ có thể đồng bộ hóa |
+| Dữ liệu luôn được cập nhật                | Dữ liệu có thể bị lỗi thời                                 |
+| Không cần xử lý loading/error states      | Cần xử lý nhiều trạng thái (loading, error, success)       |
+| Dữ liệu không cần cache                   | Cần cơ chế cache để tối ưu hiệu suất                       |
+| Ví dụ: theme, language settings, UI state | Ví dụ: user data, posts, comments từ API                   |
+
+Trong khi hầu hết các thư viện state management truyền thống như redux, zustand,... rất tốt cho việc làm việc với client state, chúng không tốt lắm trong việc làm việc với server state, ví dụ:
+
+- Caching
+- Biết khi nào dữ liệu bị lỗi thời và cập nhật dữ liệu bị lỗi thời trong nền
+- Phản ánh các cập nhật dữ liệu nhanh nhất có thể
+- Tối ưu hóa hiệu suất như phân trang và tải dữ liệu khi cần
+- Quản lý bộ nhớ và thu gom rác của trạng thái máy chủ
+- Quản lý việc lưu trữ và giải phóng dữ liệu từ trạng thái máy chủ
+
+Cài đặt:
+
+- `npm i @tanstack/react-query`
+- `npm i @tanstack/react-query-devtools`
+
+Cấu hình:
+
+```jsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+const queryClient = new QueryClient();
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      {/* Phần còn lại của ứng dụng */}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
+}
+```
+
+### Query
+
+Một query có thể được sử dụng để lấy dữ liệu từ máy chủ.
+
+Để sử dụng query trong react, ta sử dụng useQuery hook với ít nhất 2 tham số là queryKey và queryFn
+
+- queryKey: là khoá duy nhất (unique key) để định danh query.
+- queryFn: là một hàm trả về một promise để resolve data hoặc throw error
+
+Kết quả trả về của useQuery chứa một số thông tin về trạng thái của query:
+
+- isPending hoặc status === "pending" - Query chưa có dữ liệu
+- isError hoặc status === "error" - Query lỗi
+- isSuccess hoặc status === "success" - Query thành công
+- isFetching - Trong bất kỳ trạng thái nào, nếu query đang lấy dữ liệu vào bất kỳ thời điểm nào (bao gồm cả việc lấy dữ liệu lại trong nền) thì isFetching sẽ là true.
+- data: Nếu query thành công (tương đương với isSuccess), dữ liệu trả về từ queryFn qua thuộc tính data
+- error: Nếu query lỗi (tương đương với isError), lỗi trả về từ queryFn qua thuộc tính error
+
+Query key là một khái niệm cốt lõi rất quan trọng trong React Query. Nó được sử dụng để lưu trữ dữ liệu của bạn một cách chính xác và tự động lấy lại dữ liệu khi một phụ thuộc vào query của bạn thay đổi. Ngoài ra, nó sẽ cho phép bạn tương tác với bộ nhớ đệm (query caching) một cách thủ công khi cần, ví dụ, cần cập nhật dữ liệu sau khi thay đổi dữ liệu từ server.
+
+Query key phải là duy nhất cho từng query và phải là một mảng, và có thể đơn giản chỉ là một mảng chứa một chuỗi duy nhất, hoặc phức tạp hơn như một mảng bao gồm nhiều chuỗi và các đối tượng lồng nhau.
+
+Query key mô tả duy nhất dữ liệu mà nó đang lấy, nên bạn cần bao gồm mọi biến có khả năng thay đổi mà bạn sử dụng trong queryFn.
+
+- useQuery({ queryKey: ["todos"], queryFn: () => getTodos() }) // Lấy danh sách todos
+- useQuery({ queryKey: ["todos", "1"], queryFn: () => getTodoById("1") }) // Lấy todo theo id
+- useQuery({ queryKey: ["todos", { filter }], queryFn: () => getTodos(filter) }) // Lấy todos với filter
+
+#### Transform data
+
+useQuery cung cấp thuộc tính select để transform data.
+
+```jsx
+useQuery({
+  queryKey: ["todos"],
+  queryFn: getTodos,
+  select: (data) => data.map((todo) => todo.title.toUpperCase()),
+});
+```
+
+Selectors sẽ chỉ được gọi nếu dữ liệu tồn tại, vì vậy bạn không cần lo lắng về giá trị undefined ở đây. Các selector như ví dụ trên cũng sẽ được thực thi ở mỗi lần render do nó là một hàm được khai báo nội tuyến. Bạn có thể tối ưu hóa nó bằng cách ghi nhớ (memoize) thông qua useCallback, hoặc bằng cách tách nó ra thành một hàm riêng.
+
+```jsx
+const getTodosUppercase = (data) =>
+  data.map((todo) => todo.title.toUpperCase());
+
+useQuery({
+  queryKey: ["todos"],
+  queryFn: getTodos,
+  select: getTodosUppercase,
+});
+```
+
+```jsx
+useQuery({
+  queryKey: ["todos"],
+  queryFn: getTodos,
+  select: useCallback(
+    (data: Todos) => data.map((todo) => todo.name.toUpperCase()),
+    []
+  ),
+});
+```
+
+[Code sample Query](src/14-react-query/query/query.tsx)
+
+#### Dependent query/Lazy query
+
+useQuery cung cấp một tuỳ chọn rất hữu ích là enabled, nó cho phép bạn kiểm soát việc query có được thực thi hay không.
+
+- Truy vấn phụ thuộc (Dependent Queries): Lấy dữ liệu từ một query và chỉ chạy query thứ hai sau khi đã lấy thành công dữ liệu từ query đầu tiên.
+
+  ```jsx
+  const { data: user } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: () => fetchUserById(userId),
+  });
+
+  const { data: posts } = useQuery({
+    queryKey: ["posts", user?.id],
+    queryFn: () => fetchPostsByUserId(user?.id),
+    enabled: !!user,
+  });
+  ```
+
+- Truy vấn lười biến (Lazy Queries): Chỉ chạy query khi cần thiết, thay vì chạy ngay khi component được render. Một ví dụ điển hình là filter, nơi bạn chỉ muốn gửi yêu cầu đầu tiên khi người dùng đã nhập giá trị của filter:
+
+```jsx
+const [filter, setFilter] = React.useState("");
+
+const { data } = useQuery({
+  queryKey: ["todos", filter],
+  queryFn: () => fetchTodos(filter),
+  enabled: !!filter,
+});
+```
+
+[Code sample Lazy query](src/14-react-query/query/lazy-query.tsx)
+
+### Mutation
+
+Khác với query, mutation là một cách để tạo/cập nhật/xóa dữ liệu trên máy chủ.
+
+Để sử dụng mutation trong react, ta sử dụng useMutation hook với ít nhất 1 tham số là mutationFn
+
+- mutationFn: là một hàm trả về một promise để resolve data hoặc throw error
+
+Kết quả trả về của useMutation chứa một số thông tin về trạng thái của mutation:
+
+- isIdle hoặc status === "idle" - Mutation đang ở trạng thái nhàn rỗi (nghĩa là đang chờ để thực hiện)
+- isPending hoặc status === "pending" - Mutation đang chạy
+- isError hoặc status === "error" - Mutation đã gặp phải lỗi
+- isSuccess hoặc status === "success" - Mutation đã thành công
+- data: Nếu mutation thành công (tương đương với isSuccess), dữ liệu trả về từ mutationFn qua thuộc tính data
+- error: Nếu mutation lỗi (tương đương với isError), lỗi trả về từ mutationFn qua thuộc tính error
+- mutate và mutateAsync: là các hàm để thực hiện mutation.
+
+useMutation cung cấp một số callback hook để xử lý các trạng thái khác nhau của mutation:
+
+- onMutate: Được gọi khi mutation được thực hiện
+- onSuccess: Được gọi khi mutation thành công
+- onError: Được gọi khi mutation gặp phải lỗi
+- onSettled: Được gọi khi mutation đã được thực hiện hoặc gặp phải lỗi
+
+#### Invalidation from mutation
+
+Sau khi bạn thay trạng thái máy chủ bằng mutation, đây là một thời điểm tuyệt vời để thông báo cho React Query rằng một số dữ liệu bạn đã lưu cache hiện đã "lỗi thời". Điều duy nhất bạn cần làm là thông báo những truy vấn nào bạn muốn xem là "lỗi thời" bằng cách sử dụng hàm `invalidateQueries`. React Query sẽ sau đó đi và lấy lại dữ liệu đó nếu nó đang được sử dụng, và giao diện của bạn sẽ tự động cập nhật cho bạn ngay khi việc lấy dữ liệu hoàn tất.
+
+Các Promise được trả về từ các hàm callback của mutation sẽ được React Query chờ (await). Bởi vì invalidateQueries trả về một Promise. Nếu bạn muốn mutation của mình duy trì trạng thái loading trong khi các truy vấn liên quan đang được cập nhật, bạn cần trả về kết quả của invalidateQueries từ hàm callback:
+
+```jsx
+const queryClient = useQueryClient();
+
+useMutation({
+  mutationFn,
+
+  // mutation sẽ chờ cho đến khi invalidateQueries hoàn tất
+  // Điều đó có nghĩa là mutation sẽ trả về isPending = true cho đến khi invalidateQueries hoàn tất
+  onSuccess: () => {
+    return queryClient.invalidateQueries({
+      queryKey: ["posts", id, "comments"],
+    });
+  },
+
+  // mutation sẽ không chờ
+  // Điều đó có nghĩa là mutation sẽ trả về isPending = true mà không cần chờ invalidateQueries hoàn tất
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ["posts", id, "comments"],
+    });
+  };
+})
+```
+
+#### Mutate vs MutateAsync
+
+mutate không trả về bất kỳ giá trị nào, trong khi mutateAsync trả về một Promise chứa kết quả của mutation.
+
+Đối với mutate bạn vẫn có thể truy cập vào dữ liệu hoặc lỗi thông qua các callback, và bạn không cần lo lắng về việc xử lý lỗi.
+
+Vì mutateAsync trao quyền kiểm soát Promise cho bạn, bạn cũng sẽ phải tự xử lý lỗi một cách thủ công, nếu không có thể dẫn đến lỗi unhandled promise rejection (Promise bị từ chối mà không được xử lý).
+
+```jsx
+const onSubmit = () => {
+  // Truy cập dữ liệu thông qua onSuccess
+  mutate(someData, {
+    onSuccess: (data) => console.log(data),
+  });
+};
+
+const onSubmit = async () => {
+  // Vẫn truy cập được dữ liệu nhưng thiếu xử lý lỗi và có thể gây ra lỗi unhandled promise rejection
+  const data = await mutateAsync(someData);
+  console.log(data);
+};
+
+const onSubmit = async () => {
+  // Gây ra sự dài dòng trong trường hợp bạn không cần xử lý lỗi
+  try {
+    const data = await mutateAsync(someData);
+    console.log(data);
+  } catch (error) {
+    // do nothing
+  }
+};
+```
+
+[Code](src/14-react-query/mutation/mutation.tsx)
+
+### React query as async state manager
+
+React Query là một trình quản lý trạng thái bất đồng bộ (async state manager).
+
+Như đã đề cập query key là định danh duy nhất cho query của bạn, vì vậy miễn là bạn gọi query với cùng một key ở hai nơi khác nhau, chúng sẽ nhận cùng một dữ liệu. Điều này có thể được trừu tượng hóa tốt nhất thông qua một custom hook để chúng ta không cần phải gọi trực tiếp hàm lấy dữ liệu hai lần:
+
+```jsx
+const useTodos = () => {
+  return useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+};
+
+function ComponentA() {
+  const { data } = useTodos();
+}
+
+function ComponentB() {
+  // sẽ nhận được dữ liệu giống như ComponentA mà không cần thực hiện một request mới
+  const { data } = useTodos();
+}
+```
+
+Tuy nhiên ví dụ sau đây lại gọi hàm lấy dữ liệu hai lần. Mặc định react query set thời gian mà dữ liệu sẽ được coi là "mới" là 0. Nghĩa là mỗi khi bạn thực hiện mount component không nằm trong cùng một chu kì render mà có sử dụng useQuery, bạn sẽ nhận được một request mới.
+
+```jsx
+const useTodos = () => {
+  return useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+};
+
+function ComponentA() {
+  const [show, setShow] = useState(false);
+
+  const { data } = useTodos();
+
+  return (
+    <div>
+      Todo count: {data.length}
+      <button onClick={() => setShow(true)}>Show</button>
+      {show ? <ComponentB /> : null}
+    </div>
+  );
+}
+
+function ComponentB() {
+  // sẽ trigger một request mạng mới
+  const { data } = useTodos();
+}
+```
+
+#### Tuỳ chỉnh giá trị của staleTime
+
+React query cung cấp một thuộc tính là staleTime, nó cho phép bạn kiểm soát thời gian mà dữ liệu sẽ được coi là "mới" trong bộ nhớ cache.
+
+Miễn là dữ liệu còn mới, nó sẽ luôn chỉ đến từ bộ nhớ cache. Bạn sẽ không thấy yêu cầu mạng cho dữ liệu mới, bất kể bạn muốn truy xuất nó bao nhiêu lần.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
