@@ -16,13 +16,18 @@ export default function Mutation() {
   } = useMutation({
     mutationFn: (todo: string) => createTodo(todo),
     // Awaited
-    onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: ["todos"] });
-    },
+    // onSuccess: () => {
+    //   return queryClient.invalidateQueries({ queryKey: ["todos"] });
+    // },
+
     // Not awaited
     // onSuccess: () => {
     //   queryClient.invalidateQueries({ queryKey: ["todos"] });
     // },
+
+    meta: {
+      invalidateKeys: [["todos"]],
+    },
   });
 
   const handleCreateTodo = async () => {
@@ -30,7 +35,7 @@ export default function Mutation() {
     if (!todo) return;
 
     mutate(todo, {
-      onSuccess: (data) => {
+      onSuccess(data) {
         console.log(data);
       },
     });
@@ -59,11 +64,7 @@ export default function Mutation() {
         ))}
       </ul>
 
-      <button
-        className="btn"
-        onClick={handleCreateTodo}
-        disabled={isCreatingTodo}
-      >
+      <button className="btn" onClick={handleCreateTodo} disabled={isCreatingTodo}>
         Add Todo
       </button>
     </>

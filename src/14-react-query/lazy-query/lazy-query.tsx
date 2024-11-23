@@ -1,17 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, skipToken } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
 
 const getUsers = () => {
-  return axios
-    .get("https://jsonplaceholder.typicode.com/users")
-    .then((resp) => resp.data);
+  return axios.get("https://jsonplaceholder.typicode.com/users").then((resp) => resp.data);
 };
 
 const getPosts = (userId: string) => {
-  return axios
-    .get(`https://jsonplaceholder.typicode.com/posts?userId=${userId}`)
-    .then((resp) => resp.data);
+  return axios.get(`https://jsonplaceholder.typicode.com/posts?userId=${userId}`).then((resp) => resp.data);
 };
 
 export default function LazyQuery() {
@@ -25,7 +21,7 @@ export default function LazyQuery() {
 
   const { data: posts, isLoading: isPostsLoading } = useQuery({
     queryKey: ["posts", userId],
-    queryFn: () => getPosts(userId!),
+    queryFn: userId ? () => getPosts(userId) : skipToken,
     enabled: !!userId,
   });
 
