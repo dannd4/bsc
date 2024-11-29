@@ -1,4 +1,6 @@
 import "@tanstack/react-query";
+import '@emotion/react'
+
 
 import { DefaultError, QueryKey } from "@tanstack/react-query";
 
@@ -18,12 +20,46 @@ declare module "@tanstack/react-query" {
   }
 }
 
-// useMutation({
-//   mutationFn
-//   meta: {
-//     invalidateKeys: [
-//       ["todos"],
-//       ["users"]
-//     ]
-//   }
-// })
+declare module "@emotion/react" {
+  interface Theme {
+    colors: {
+      primary: string;
+      secondary: string;
+      danger: string;
+      default: string;
+      background: string;
+      error: string;
+      border: string;
+      text: string;
+      placeholder: string;
+    };
+    spacing: {
+      small: string;
+      medium: string;
+      large: string;
+      xlarge: string;
+    };
+    borderRadius: {
+      small: string;
+      medium: string;
+      large: string;
+    };
+    typography: {
+      h1: {
+        fontSize: string;
+        fontWeight: number;
+      };
+      h3: {
+        fontSize: string;
+        fontWeight: number;
+      };
+      body: {
+        fontSize: string;
+        fontWeight: number;
+      };
+    };
+    shadows: {
+      card: string;
+    };
+  }
+}

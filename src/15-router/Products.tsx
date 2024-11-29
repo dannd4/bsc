@@ -1,24 +1,45 @@
-// /products
-// /produts/iphone-14
-// /products/samsung-s24
-
-import { useNavigate, useSearchParams } from "react-router";
-import data from "./data.json";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useSearchParams, useLoaderData } from "react-router";
+import { productsQuery } from "./loader";
 
 export default function Products() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // const data = useLoaderData()
+  const { data, isPending, error } = useQuery(
+    productsQuery({
+      page: searchParams.get("page")
+        ? Number(searchParams.get("page"))
+        : undefined,
+      limit: searchParams.get("limit")
+        ? Number(searchParams.get("limit"))
+        : undefined,
+    })
+  );
+
   const navigate = useNavigate();
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  console.log(searchParams.get("name"));
+  if (isPending) {
+    return <h1>Loading...</h1>;
+  }
 
-  const products = data.filter((item) => item.name.toLowerCase().includes(searchParams.get("name") || ""));
+  if (error) {
+    return <h1>{error.message}</h1>;
+  }
+
+  const products = data.data.filter((item) =>
+    item.title.toLowerCase().includes(searchParams.get("name") || "")
+  );
 
   return (
     <>
       <div className="flex gap-4">
         {products.map((product) => (
-          <div key={product.id} className="w-[300px] text-black bg-white rounded-md">
-            <h1 className="text-xl">{product.name}</h1>
+          <div
+            key={product.id}
+            className="w-[300px] text-black bg-white rounded-md"
+          >
+            <h1 className="text-xl">{product.title}</h1>
             <p>{product.price}</p>
             <button className="btn" onClick={() => navigate(`${product.id}`)}>
               Details

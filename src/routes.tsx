@@ -1,25 +1,13 @@
 import { createBrowserRouter } from "react-router";
 import RootLayout from "./layouts/RootLayout";
 import PrivateRoute from "./routers/PrivateRoute";
-import { Suspense } from "react";
-
-// import Profile from "./1-components/profile";
-// import ReactQuery from "./14-react-query/react-query";
-// import Redux from "./13-redux/redux";
-// import Products from "./15-router/Products";
-// import ProductDetails from "./15-router/ProductDetails";
-
-// Home: bsc.com/
-// PriceBoard: bsc.com/priceboard
+import { productDetailsLoader, productsLoader } from "./15-router/loader.ts";
+import { queryClient } from "./queryClient.ts";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: (
-      <Suspense fallback={<h1>...Loading</h1>}>
-        <RootLayout />
-      </Suspense>
-    ),
+    element: <RootLayout />,
     children: [
       {
         path: "/",
@@ -31,6 +19,7 @@ const router = createBrowserRouter([
 
       {
         path: "/products",
+        loader: productsLoader(queryClient),
         async lazy() {
           const Products = (await import("./15-router/Products.tsx")).default;
           return { Component: Products };
@@ -38,10 +27,9 @@ const router = createBrowserRouter([
       },
       {
         path: "/products/:productId",
+        loader: productDetailsLoader(queryClient),
         async lazy() {
-          const ProductDetails = (
-            await import("./15-router/ProductDetails.tsx")
-          ).default;
+          const ProductDetails = (await import("./15-router/ProductDetails.tsx")).default;
           return { Component: ProductDetails };
         },
       },
@@ -53,9 +41,7 @@ const router = createBrowserRouter([
           {
             path: "/react-query",
             async lazy() {
-              const ReactQuery = (
-                await import("./14-react-query/react-query.tsx")
-              ).default;
+              const ReactQuery = (await import("./14-react-query/react-query.tsx")).default;
               return { Component: ReactQuery };
             },
           },
@@ -69,6 +55,14 @@ const router = createBrowserRouter([
         ],
       },
     ],
+  },
+
+  {
+    path: "/styles",
+    async lazy() {
+      const Styles = (await import("./16-styles/styles.tsx")).default;
+      return { Component: Styles };
+    },
   },
 ]);
 

@@ -1,0 +1,62 @@
+.title {
+  color: #2d3748;
+  font-size: 2.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.accordion {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+
+  .header {
+    background-color: blue;
+    padding: 10px;
+  }
+
+  .body {
+    padding: 10px;
+
+    &[data-collapsed="true"] {
+      display: none;
+    }
+
+    &.collapsed {
+      display: none;
+    }
+  }
+}
+
+.toggle {
+  width: 60px;
+  height: 34px;
+  background-color: #e9e9ea;
+  border-radius: 17px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.3s ease;
+
+  &.toggleOff {
+    background-color: #e9e9ea;
+  }
+
+  &.toggleOn {
+    background-color: #34c759;
+  }
+
+  .toggleBall {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+
+    &.toggleBallOn {
+      transform: translateX(26px);
+    }
+  }
+}

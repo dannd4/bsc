@@ -1609,20 +1609,3 @@ function ComponentB() {
 React query cung cấp một thuộc tính là staleTime, nó cho phép bạn kiểm soát thời gian mà dữ liệu sẽ được coi là "mới" trong bộ nhớ cache.
 
 Miễn là dữ liệu còn mới, nó sẽ luôn chỉ đến từ bộ nhớ cache. Bạn sẽ không thấy yêu cầu mạng cho dữ liệu mới, bất kể bạn muốn truy xuất nó bao nhiêu lần.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
