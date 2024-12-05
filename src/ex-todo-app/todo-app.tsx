@@ -5,7 +5,7 @@ import TodoFilter from "./todo-filter";
 import TodoList from "./todo-list";
 import { Filter, Todo } from "./types";
 
-const http = axios.create({
+export const http = axios.create({
   baseURL: "https://api.freeapi.app",
   // baseURL: "https://freeapi-cybersoft.up.railway.app"
 });
@@ -80,12 +80,18 @@ export default function TodoApp() {
     <>
       <div className="flex flex-col gap-8 place-self-center min-w-[500px] w-1/3 rounded-xl pt-10">
         <div className="px-6">
-          <h1 className="text-2xl font-bold uppercase tracking-[0.5em] text-orange-600">Todo</h1>
+          <h1 className="text-2xl font-bold uppercase tracking-[0.5em] text-orange-600">
+            Todo
+          </h1>
         </div>
 
         <TodoCreate onCreateTodo={handleCreateTodo} />
 
-        <TodoList todos={todos} onDeleteTodo={handleDeleteTodo} onUpdateStatus={handleUpdateStatus} />
+        <TodoList
+          todos={todos}
+          onDeleteTodo={handleDeleteTodo}
+          onUpdateStatus={handleUpdateStatus}
+        />
 
         <TodoFilter filter={filter} onUpdateFilter={handleUpdateFilter} />
       </div>

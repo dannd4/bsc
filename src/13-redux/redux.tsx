@@ -5,7 +5,6 @@ import { getTodos } from "../slices/todo";
 
 export default function Redux() {
   const count = useSelector((state) => state.counter.count);
-  const { todos, loading, error } = useSelector((state) => state.todo);
   const dispatch = useDispatch();
 
   const handleIncrease = () => {

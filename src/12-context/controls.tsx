@@ -6,8 +6,8 @@ function Controls() {
   return (
     <div className="mb-4">
       <div>
-        <label>
-          Dark Mode:
+        <label data-testid="theme-label">
+          Theme: {theme.isDarkMode ? "dark" : "light"}
           <input type="checkbox" checked={theme.isDarkMode} onChange={toggleDarkMode} />
         </label>
       </div>
